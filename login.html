@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OKX - Вход в систему</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #0d0d0d 50%, #0a0a0a 100%);
+            color: white;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .input-field {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            color: white;
+            border-radius: 12px;
+            padding: 14px 16px;
+            width: 100%;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .input-field:focus {
+            border-color: #00ff5a;
+            background: rgba(26, 26, 26, 0.8);
+            box-shadow: 0 0 0 3px rgba(0, 255, 90, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .input-field::placeholder {
+            color: #666;
+        }
+
+        .login-button {
+            background: linear-gradient(135deg, #00ff5a 0%, #00e54d 100%);
+            color: #0a0a0a;
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            width: 100%;
+            font-weight: 700;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .login-button:hover::before {
+            left: 100%;
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 255, 90, 0.4);
+        }
+
+        .login-button:active {
+            transform: translateY(0);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 16px;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: #666;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .tab-button:hover {
+            color: #999;
+        }
+
+        .tab-button.active {
+            color: #00ff5a;
+            border-bottom-color: #00ff5a;
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: #00ff5a;
+            box-shadow: 0 0 12px rgba(0, 255, 90, 0.6);
+        }
+
+        .form-container {
+            display: none;
+        }
+
+        .form-container.active {
+            display: block;
+        }
+
+        .error-message {
+            color: #ff4976;
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .success-message {
+            color: #00ff5a;
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="min-h-screen flex items-center justify-center px-4">
+        <div class="w-full max-w-md">
+            <div class="text-center mb-8">
+                <div class="font-bold text-[#00ff5a] text-4xl tracking-wider mb-3" style="text-shadow: 0 0 20px rgba(0, 255, 90, 0.4);">OKX</div>
+                <div class="text-[#999] text-base font-medium">Войдите чтобы продолжить</div>
+                <div class="text-[#666] text-sm mt-2">Торговая платформа нового поколения</div>
+            </div>
+
+            <div class="bg-[#111] rounded-2xl p-8 shadow-2xl" style="border: 1px solid #222; backdrop-filter: blur(20px);">
+                <!-- Tab buttons -->
+                <div class="flex mb-6">
+                    <button class="tab-button active" data-tab="login">Вход</button>
+                    <button class="tab-button" data-tab="register">Регистрация</button>
+                </div>
+
+                <!-- Login Form -->
+                <div id="login-form" class="form-container active">
+                    <form id="loginForm" class="space-y-4">
+                        <div>
+                            <label class="block text-[#888] text-sm mb-2">Telegram Username</label>
+                            <input type="text" id="telegram" required class="input-field" placeholder="@username">
+                        </div>
+
+                        <div>
+                            <label class="block text-[#888] text-sm mb-2">Пароль</label>
+                            <input type="password" id="password" required class="input-field" placeholder="Введите пароль">
+                        </div>
+
+                        <div id="login-error" class="error-message hidden"></div>
+
+                        <button type="submit" class="login-button mt-6">
+                            Войти
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Registration Form -->
+                <div id="register-form" class="form-container">
+                    <form id="registerForm" class="space-y-4">
+                        <div>
+                            <label class="block text-[#888] text-sm mb-2">Telegram Username</label>
+                            <input type="text" id="reg-telegram" required class="input-field" placeholder="@username">
+                        </div>
+
+                        <div>
+                            <label class="block text-[#888] text-sm mb-2">Email</label>
+                            <input type="email" id="reg-email" required class="input-field" placeholder="email@example.com">
+                        </div>
+
+                        <div>
+                            <label class="block text-[#888] text-sm mb-2">Пароль</label>
+                            <input type="password" id="reg-password" required class="input-field" placeholder="Введите пароль">
+                        </div>
+
+                        <div>
+                            <label class="block text-[#888] text-sm mb-2">Подтвердите пароль</label>
+                            <input type="password" id="reg-confirm-password" required class="input-field" placeholder="Подтвердите пароль">
+                        </div>
+
+                        <div id="register-error" class="error-message hidden"></div>
+                        <div id="register-success" class="success-message hidden"></div>
+
+                        <button type="submit" class="login-button mt-6">
+                            Зарегистрироваться
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="mt-6 text-center text-[#888] text-sm">
+                <a href="#" class="text-[#00ff5a] hover:underline" id="toggle-form">Еще нет аккаунта? Зарегистрироваться</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Backend API URL (serving from same server)
+        const API_BASE_URL = '/api';
+
+        // Tab switching functionality
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const forms = document.querySelectorAll('.form-container');
+        const toggleFormLink = document.getElementById('toggle-form');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons and forms
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                forms.forEach(form => form.classList.remove('active'));
+                
+                // Add active class to clicked button
+                button.classList.add('active');
+                
+                // Show corresponding form
+                const tabId = button.getAttribute('data-tab');
+                document.getElementById(`${tabId}-form`).classList.add('active');
+                
+                // Hide any error/success messages when switching tabs
+                document.getElementById('login-error').classList.add('hidden');
+                document.getElementById('register-error').classList.add('hidden');
+                document.getElementById('register-success').classList.add('hidden');
+            });
+        });
+
+        // Toggle form via link
+        toggleFormLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Remove active class from all buttons and forms
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            forms.forEach(form => form.classList.remove('active'));
+            
+            // Activate registration tab and form
+            document.querySelector('.tab-button[data-tab="register"]').classList.add('active');
+            document.getElementById('register-form').classList.add('active');
+        });
+
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const telegram = document.getElementById('telegram').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('login-error');
+
+            // Check for admin credentials
+            if (telegram === 'admin' && password === 'Zxcv1236') {
+                // Redirect to admin panel
+                window.location.href = '/admin.html';
+                return;
+            }
+
+            if (!telegram || !password) {
+                errorDiv.textContent = 'Пожалуйста, заполните все поля';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            // Send login request to backend
+            fetch(`${API_BASE_URL}/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    telegram: telegram,
+                    password: password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Save user data to localStorage
+                    localStorage.setItem('tgUsername', data.telegram);
+                    localStorage.setItem('balance', data.balance);
+                    
+                    // Redirect to main page
+                    window.location.href = '/';
+                } else {
+                    errorDiv.textContent = data.message;
+                    errorDiv.classList.remove('hidden');
+                }
+            })
+            .catch(error => {
+                errorDiv.textContent = 'Ошибка подключения к серверу';
+                errorDiv.classList.remove('hidden');
+                console.error('Error:', error);
+            });
+        });
+
+        // Registration form submission
+        document.getElementById('registerForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const telegram = document.getElementById('reg-telegram').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirm-password').value;
+            
+            const errorDiv = document.getElementById('register-error');
+            const successDiv = document.getElementById('register-success');
+
+            if (!telegram || !email || !password || !confirmPassword) {
+                errorDiv.textContent = 'Пожалуйста, заполните все поля';
+                errorDiv.classList.remove('hidden');
+                successDiv.classList.add('hidden');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                errorDiv.textContent = 'Пароли не совпадают';
+                errorDiv.classList.remove('hidden');
+                successDiv.classList.add('hidden');
+                return;
+            }
+
+            // Send registration request to backend
+            fetch(`${API_BASE_URL}/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    telegram: telegram,
+                    email: email,
+                    password: password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    successDiv.textContent = 'Регистрация успешна! Теперь вы можете войти.';
+                    successDiv.classList.remove('hidden');
+                    errorDiv.classList.add('hidden');
+                    
+                    // Clear form
+                    document.getElementById('registerForm').reset();
+                    
+                    // Switch to login tab after successful registration
+                    setTimeout(() => {
+                        tabButtons.forEach(btn => btn.classList.remove('active'));
+                        forms.forEach(form => form.classList.remove('active'));
+                        
+                        document.querySelector('.tab-button[data-tab="login"]').classList.add('active');
+                        document.getElementById('login-form').classList.add('active');
+                    }, 2000);
+                } else {
+                    errorDiv.textContent = data.message;
+                    errorDiv.classList.remove('hidden');
+                    successDiv.classList.add('hidden');
+                }
+            })
+            .catch(error => {
+                errorDiv.textContent = 'Ошибка подключения к серверу';
+                errorDiv.classList.remove('hidden');
+                successDiv.classList.add('hidden');
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+
+</html>

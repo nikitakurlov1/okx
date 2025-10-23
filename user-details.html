@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OKX Admin - Детали пользователя</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #0d0d0d 50%, #0a0a0a 100%);
+            color: white;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .admin-header {
+            background: rgba(17, 17, 17, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid #222;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .user-card {
+            background: rgba(17, 17, 17, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid #222;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .user-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+            border-color: rgba(0, 255, 90, 0.2);
+        }
+
+        .setting-card {
+            background: rgba(17, 17, 17, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid #222;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .setting-card:hover {
+            border-color: rgba(0, 255, 90, 0.2);
+        }
+
+        .input-field {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            color: white;
+            border-radius: 12px;
+            padding: 14px 16px;
+            width: 100%;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .input-field:focus {
+            border-color: #00ff5a;
+            background: rgba(26, 26, 26, 0.8);
+            box-shadow: 0 0 0 3px rgba(0, 255, 90, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00ff5a 0%, #00e54d 100%);
+            color: #0a0a0a;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 24px;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 255, 90, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #1a1a1a;
+            color: #00ff5a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 14px 24px;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 255, 90, 0.1);
+            border-color: #00ff5a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4976 0%, #ff3d5a 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 24px;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255, 73, 118, 0.4);
+        }
+
+        .btn-danger:active {
+            transform: translateY(0);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .radio-input {
+            width: 18px;
+            height: 18px;
+            accent-color: #00ff5a;
+            cursor: pointer;
+        }
+
+        .balance-positive {
+            color: #00ff5a;
+        }
+
+        .balance-negative {
+            color: #ff4976;
+        }
+
+        .back-link {
+            color: #00ff5a;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .notification {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .notification.success {
+            background: rgba(0, 255, 90, 0.1);
+            border: 1px solid #00ff5a;
+            color: #00ff5a;
+        }
+
+        .notification.error {
+            background: rgba(240, 90, 80, 0.1);
+            border: 1px solid #f05a50;
+            color: #f05a50;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-header">
+        <div class="max-w-7xl mx-auto">
+            <a href="/admin.html" class="back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7"></path>
+                </svg>
+                Назад к админке
+            </a>
+            <h1 class="text-2xl font-bold text-[#00ff5a]">OKX Admin Panel</h1>
+            <p class="text-[#888]">Управление пользователем</p>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Notification -->
+        <div id="notification" class="notification"></div>
+
+        <!-- User Info Card -->
+        <div class="user-card mb-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="user-avatar w-16 h-16 rounded-full bg-[#1a1a1a] flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold" id="user-username">@username</h2>
+                        <p class="text-[#888]" id="user-email">email@example.com</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm text-[#888]">Текущий баланс</div>
+                    <div class="text-2xl font-bold balance-positive" id="user-balance">0.00 USDT</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Balance Adjustment -->
+        <div class="setting-card">
+            <h3 class="text-lg font-bold mb-4">Изменение баланса</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-[#888] text-sm mb-2">Сумма изменения</label>
+                    <input type="number" id="balance-amount" step="0.01" class="input-field"
+                        placeholder="Введите сумму (положительная или отрицательная)">
+                </div>
+                <div>
+                    <label class="block text-[#888] text-sm mb-2">Причина изменения</label>
+                    <select id="balance-reason" class="input-field">
+                        <option value="manual">Ручная корректировка</option>
+                        <option value="bonus">Бонус</option>
+                        <option value="penalty">Штраф</option>
+                        <option value="refund">Возврат</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-4">
+                <button id="update-balance-btn" class="btn-primary">Обновить баланс</button>
+            </div>
+        </div>
+
+        <!-- Bet Outcome Control -->
+        <div class="setting-card">
+            <h3 class="text-lg font-bold mb-4">Контроль результатов ставок</h3>
+            <div class="mb-4">
+                <label class="block text-[#888] text-sm mb-2">Результат ставок для этого пользователя</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="bet-outcome" value="random" class="radio-input" checked>
+                        <span>Случайный (по умолчанию)</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="bet-outcome" value="win" class="radio-input">
+                        <span>Всегда выигрыш</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="bet-outcome" value="lose" class="radio-input">
+                        <span>Всегда проигрыш</span>
+                    </label>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label class="block text-[#888] text-sm mb-2">Коэффициент выигрыша</label>
+                <input type="number" id="win-multiplier" step="0.1" min="0.1" max="10" value="2.0" class="input-field"
+                    placeholder="Коэффициент выигрыша (например, 2.0)">
+                <p class="text-[#888] text-sm mt-1">Определяет, во сколько раз увеличивается ставка при выигрыше</p>
+            </div>
+            <div>
+                <button id="save-bet-settings-btn" class="btn-primary">Сохранить настройки</button>
+            </div>
+        </div>
+
+        <!-- User Actions -->
+        <div class="setting-card">
+            <h3 class="text-lg font-bold mb-4">Действия с пользователем</h3>
+            <div class="flex flex-wrap gap-4">
+                <button id="reset-password-btn" class="btn-secondary">Сбросить пароль</button>
+                <button id="send-notification-btn" class="btn-secondary">Отправить уведомление</button>
+                <button id="ban-user-btn" class="btn-danger">Заблокировать пользователя</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get user ID from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('id');
+
+        // Show notification function
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.display = 'block';
+            
+            // Hide notification after 5 seconds
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+
+        // Function to fetch user details
+        async function fetchUserDetails() {
+            if (!userId) {
+                showNotification('Не указан ID пользователя', 'error');
+                setTimeout(() => {
+                    window.location.href = '/admin.html';
+                }, 2000);
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/user/${userId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const user = data.user;
+                    
+                    // Update UI with user data
+                    document.getElementById('user-username').textContent = user.telegram_username;
+                    document.getElementById('user-email').textContent = user.email || 'Не указан';
+                    document.getElementById('user-balance').textContent = `${parseFloat(user.balance).toFixed(2)} USDT`;
+                    document.getElementById('user-balance').className = parseFloat(user.balance) >= 0 ? 
+                        'text-2xl font-bold balance-positive' : 'text-2xl font-bold balance-negative';
+                    
+                    // Set bet settings
+                    if (user.bet_outcome) {
+                        document.querySelector(`input[name="bet-outcome"][value="${user.bet_outcome}"]`).checked = true;
+                    }
+                    if (user.win_multiplier) {
+                        document.getElementById('win-multiplier').value = user.win_multiplier;
+                    }
+                } else {
+                    showNotification(`Ошибка загрузки данных пользователя: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error fetching user details:', error);
+                showNotification('Ошибка подключения к серверу', 'error');
+            }
+        }
+
+        // Update balance button
+        document.getElementById('update-balance-btn').addEventListener('click', async function() {
+            const amount = parseFloat(document.getElementById('balance-amount').value);
+            const reason = document.getElementById('balance-reason').value;
+
+            if (isNaN(amount)) {
+                showNotification('Пожалуйста, введите корректную сумму', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/user/${userId}/balance`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: amount,
+                        reason: reason
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Баланс успешно обновлен', 'success');
+                    
+                    // Update displayed balance
+                    document.getElementById('user-balance').textContent = `${parseFloat(data.new_balance).toFixed(2)} USDT`;
+                    document.getElementById('user-balance').className = parseFloat(data.new_balance) >= 0 ? 
+                        'text-2xl font-bold balance-positive' : 'text-2xl font-bold balance-negative';
+                    
+                    // Clear input
+                    document.getElementById('balance-amount').value = '';
+                } else {
+                    showNotification(`Ошибка обновления баланса: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error updating balance:', error);
+                showNotification('Ошибка подключения к серверу', 'error');
+            }
+        });
+
+        // Save bet settings button
+        document.getElementById('save-bet-settings-btn').addEventListener('click', async function() {
+            const outcome = document.querySelector('input[name="bet-outcome"]:checked').value;
+            const multiplier = parseFloat(document.getElementById('win-multiplier').value);
+
+            if (isNaN(multiplier) || multiplier <= 0) {
+                showNotification('Пожалуйста, введите корректный коэффициент выигрыша', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/user/${userId}/settings`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        bet_outcome: outcome,
+                        win_multiplier: multiplier
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Настройки ставок сохранены', 'success');
+                } else {
+                    showNotification(`Ошибка сохранения настроек: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error saving bet settings:', error);
+                showNotification('Ошибка подключения к серверу', 'error');
+            }
+        });
+
+        // Reset password button
+        document.getElementById('reset-password-btn').addEventListener('click', function() {
+            if (confirm('Вы уверены, что хотите сбросить пароль пользователя?')) {
+                // In a real implementation, this would send a request to the backend
+                showNotification('Пароль пользователя будет сброшен. Новый пароль будет отправлен на email.', 'success');
+            }
+        });
+
+        // Send notification button
+        document.getElementById('send-notification-btn').addEventListener('click', function() {
+            const message = prompt('Введите сообщение для отправки пользователю:');
+            if (message) {
+                // In a real implementation, this would send a request to the backend
+                showNotification(`Уведомление будет отправлено пользователю: "${message}"`, 'success');
+            }
+        });
+
+        // Ban user button
+        document.getElementById('ban-user-btn').addEventListener('click', function() {
+            if (confirm('Вы уверены, что хотите заблокировать этого пользователя? Это действие нельзя отменить.')) {
+                // In a real implementation, this would send a request to the backend
+                showNotification('Пользователь будет заблокирован.', 'success');
+            }
+        });
+
+        // Initialize page
+        fetchUserDetails();
+    </script>
+</body>
+
+</html>

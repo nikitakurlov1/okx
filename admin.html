@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OKX Admin Panel - Управление</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #0d0d0d 50%, #0a0a0a 100%);
+            color: white;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .admin-header {
+            background: rgba(17, 17, 17, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid #222;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .users-table {
+            background: rgba(17, 17, 17, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid #222;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        }
+
+        .table-header {
+            background: rgba(26, 26, 26, 0.8);
+            padding: 1.25rem 1.5rem;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #00ff5a;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr 1fr;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #1a1a1a;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .table-row:hover {
+            background: rgba(0, 255, 90, 0.05);
+            border-left: 3px solid #00ff5a;
+            padding-left: calc(1.5rem - 3px);
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-name {
+            font-weight: 600;
+        }
+
+        .user-telegram {
+            color: #888;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .balance-positive {
+            color: #00ff5a;
+        }
+
+        .balance-negative {
+            color: #ff4976;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #00ff5a 0%, #00e54d 100%);
+            color: #0a0a0a;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 255, 90, 0.4);
+        }
+
+        .refresh-btn:active {
+            transform: translateY(0);
+        }
+
+        .search-box {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: white;
+            width: 100%;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-box:focus {
+            border-color: #00ff5a;
+            box-shadow: 0 0 0 2px rgba(0, 255, 90, 0.1);
+        }
+
+        .stats-card {
+            background: rgba(17, 17, 17, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid #222;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stats-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+            border-color: rgba(0, 255, 90, 0.3);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0.75rem 0;
+            letter-spacing: -0.5px;
+        }
+
+        .positive {
+            color: #00ff5a;
+        }
+
+        .negative {
+            color: #ff4976;
+        }
+
+        .neutral {
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-header">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold text-[#00ff5a]">OKX Admin Panel</h1>
+                <p class="text-[#888]">Управление пользователями</p>
+            </div>
+            <button id="refreshBtn" class="refresh-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                    <path d="M3 3v5h5"></path>
+                    <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+                    <path d="M16 16h5v5"></path>
+                </svg>
+                Обновить
+            </button>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="stats-card">
+                <h3 class="text-[#888]">Всего пользователей</h3>
+                <div class="stat-value neutral" id="totalUsers">0</div>
+            </div>
+            <div class="stats-card">
+                <h3 class="text-[#888]">Активных пользователей</h3>
+                <div class="stat-value positive" id="activeUsers">0</div>
+            </div>
+            <div class="stats-card">
+                <h3 class="text-[#888]">Общий баланс</h3>
+                <div class="stat-value neutral" id="totalBalance">0 USDT</div>
+            </div>
+        </div>
+
+        <!-- Management Links -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <a href="/admin-payment-methods.html" 
+               style="background:#111;border-radius:1rem;padding:1.5rem;box-shadow:0 10px 25px rgba(0,0,0,0.5);display:block;text-decoration:none;transition:all 0.3s ease;"
+               onmouseover="this.style.transform='translateY(-5px)';this.style.boxShadow='0 15px 30px rgba(0,0,0,0.6)';"
+               onmouseout="this.style.transform='';this.style.boxShadow='0 10px 25px rgba(0,0,0,0.5)';">
+                <div style="display:flex;align-items:center;gap:1rem;">
+                    <div style="background:#1a1a1a;border-radius:50%;width:50px;height:50px;display:flex;align-items:center;justify-content:center;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00ff5a" stroke-width="2">
+                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                            <line x1="1" y1="10" x2="23" y2="10"></line>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 style="color:#fff;font-size:1.25rem;font-weight:600;margin:0;">Способы оплаты</h3>
+                        <p style="color:#888;margin:0.25rem 0 0;">Управление реквизитами и настройками</p>
+                    </div>
+                </div>
+            </a>
+            
+            <div style="background:#111;border-radius:1rem;padding:1.5rem;box-shadow:0 10px 25px rgba(0,0,0,0.5);">
+                <div style="display:flex;align-items:center;gap:1rem;">
+                    <div style="background:#1a1a1a;border-radius:50%;width:50px;height:50px;display:flex;align-items:center;justify-content:center;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00ff5a" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 style="color:#fff;font-size:1.25rem;font-weight:600;margin:0;">Запросы на пополнение</h3>
+                        <p style="color:#888;margin:0.25rem 0 0;">Ожидают подтверждения: <span id="pending-deposits">0</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="mb-6">
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1">
+                    <input type="text" id="searchInput" class="search-box" placeholder="Поиск по имени или Telegram...">
+                </div>
+                <div class="flex gap-2">
+                    <select id="sortSelect" class="search-box">
+                        <option value="newest">Новые первые</option>
+                        <option value="oldest">Старые первые</option>
+                        <option value="balance_high">Высокий баланс</option>
+                        <option value="balance_low">Низкий баланс</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="users-table">
+            <div class="table-header">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>Пользователь</div>
+                    <div>Email</div>
+                    <div>Баланс</div>
+                    <div>ID</div>
+                </div>
+            </div>
+            <div id="usersList">
+                <!-- Users will be loaded here -->
+                <div class="text-center py-12 text-[#888]">
+                    Загрузка пользователей...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to fetch users from the backend
+        async function fetchUsers() {
+            try {
+                const response = await fetch('/api/admin/users');
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderUsers(data.users);
+                    updateStats(data.users);
+                } else {
+                    document.getElementById('usersList').innerHTML = `
+                        <div class="text-center py-12 text-[#ff4976]">
+                            Ошибка загрузки пользователей: ${data.message}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error fetching users:', error);
+                document.getElementById('usersList').innerHTML = `
+                    <div class="text-center py-12 text-[#ff4976]">
+                        Ошибка подключения к серверу
+                    </div>
+                `;
+            }
+        }
+
+        // Function to render users in the table
+        function renderUsers(users) {
+            const usersList = document.getElementById('usersList');
+            
+            if (users.length === 0) {
+                usersList.innerHTML = `
+                    <div class="text-center py-12 text-[#888]">
+                        Пользователи не найдены
+                    </div>
+                `;
+                return;
+            }
+
+            usersList.innerHTML = users.map(user => `
+                <div class="table-row" data-user-id="${user.id}">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="user-name">${user.telegram_username}</div>
+                            <div class="user-telegram">@${user.telegram_username}</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div>${user.email || 'Не указан'}</div>
+                    </div>
+                    <div>
+                        <div class="${user.balance >= 0 ? 'balance-positive' : 'balance-negative'}">
+                            ${parseFloat(user.balance).toFixed(2)} USDT
+                        </div>
+                    </div>
+                    <div>
+                        <div>#${user.id}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add click event listeners to user rows
+            document.querySelectorAll('.table-row').forEach(row => {
+                row.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-user-id');
+                    window.location.href = `/user-details.html?id=${userId}`;
+                });
+            });
+        }
+
+        // Function to update statistics
+        function updateStats(users) {
+            document.getElementById('totalUsers').textContent = users.length;
+            
+            // For demo purposes, we'll assume all users are active
+            document.getElementById('activeUsers').textContent = users.length;
+            
+            // Calculate total balance
+            const totalBalance = users.reduce((sum, user) => sum + parseFloat(user.balance), 0);
+            document.getElementById('totalBalance').textContent = `${totalBalance.toFixed(2)} USDT`;
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            // In a real implementation, this would filter the displayed users
+            // For now, we'll just log the search term
+            console.log('Search term:', e.target.value);
+        });
+
+        // Sort functionality
+        document.getElementById('sortSelect').addEventListener('change', function(e) {
+            // In a real implementation, this would re-sort the displayed users
+            // For now, we'll just log the sort option
+            console.log('Sort option:', e.target.value);
+        });
+
+        // Refresh button
+        document.getElementById('refreshBtn').addEventListener('click', function() {
+            const btn = this;
+            const originalText = btn.innerHTML;
+            
+            // Show loading state
+            btn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="animate-spin">
+                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                    <path d="M3 3v5h5"></path>
+                    <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+                    <path d="M16 16h5v5"></path>
+                </svg>
+                Обновление...
+            `;
+            
+            // Fetch users
+            fetchUsers().finally(() => {
+                // Restore button text
+                btn.innerHTML = originalText;
+            });
+        });
+
+        // Initial load
+        fetchUsers();
+    </script>
+</body>
+
+</html>

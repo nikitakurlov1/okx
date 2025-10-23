@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OKX Admin - Payment Methods</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #0d0d0d;
+            color: white;
+            min-height: 100vh;
+        }
+
+        .admin-header {
+            background: #111;
+            border-bottom: 1px solid #333;
+            padding: 1rem 2rem;
+        }
+
+        .payment-method-card {
+            background: #111;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            margin-bottom: 1.5rem;
+        }
+
+        .input-field {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: white;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            width: 100%;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .input-field:focus {
+            border-color: #00ff5a;
+            box-shadow: 0 0 0 2px rgba(0, 255, 90, 0.1);
+        }
+
+        .btn-primary {
+            background: #00ff5a;
+            color: #111;
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 90, 0.3);
+        }
+
+        .btn-secondary {
+            background: #1a1a1a;
+            color: #00ff5a;
+            border: 1px solid #333;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #222;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #f05a50;
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-danger:hover {
+            background: #ff4976;
+            transform: translateY(-2px);
+        }
+
+        .back-link {
+            color: #00ff5a;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .notification {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .notification.success {
+            background: rgba(0, 255, 90, 0.1);
+            border: 1px solid #00ff5a;
+            color: #00ff5a;
+        }
+
+        .notification.error {
+            background: rgba(240, 90, 80, 0.1);
+            border: 1px solid #f05a50;
+            color: #f05a50;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #00ff5a;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-header">
+        <div class="max-w-7xl mx-auto">
+            <a href="/admin.html" class="back-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7"></path>
+                </svg>
+                Назад к админке
+            </a>
+            <h1 class="text-2xl font-bold text-[#00ff5a]">OKX Admin Panel</h1>
+            <p class="text-[#888]">Управление способами оплаты</p>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Notification -->
+        <div id="notification" class="notification"></div>
+
+        <!-- Add New Payment Method -->
+        <div class="glass-card" style="margin-bottom: 2rem;">
+            <h3 class="section-title">Добавить новый способ оплаты</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-[#888] text-sm mb-2">ID способа оплаты</label>
+                    <input type="text" id="new-method-id" class="input-field" placeholder="Уникальный ID (например, bank_transfer)">
+                </div>
+                <div>
+                    <label class="block text-[#888] text-sm mb-2">Название</label>
+                    <input type="text" id="new-method-name" class="input-field" placeholder="Название способа оплаты">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-[#888] text-sm mb-2">Реквизиты/Инструкции</label>
+                    <textarea id="new-method-details" class="input-field" rows="4"
+                        placeholder="Подробные реквизиты и инструкции по оплате"></textarea>
+                </div>
+            </div>
+            <div class="mt-4">
+                <button id="add-method-btn" class="btn-primary">Добавить способ оплаты</button>
+            </div>
+        </div>
+
+        <!-- Existing Payment Methods -->
+        <div class="glass-card">
+            <h3 class="section-title">Существующие способы оплаты</h3>
+            <div id="payment-methods-list">
+                <!-- Payment methods will be loaded here -->
+                <div class="text-center py-12 text-[#888]">
+                    Загрузка способов оплаты...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show notification function
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.display = 'block';
+            
+            // Hide notification after 5 seconds
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+
+        // Function to fetch payment methods
+        async function fetchPaymentMethods() {
+            try {
+                const response = await fetch('/api/admin/payment-methods');
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderPaymentMethods(data.methods);
+                } else {
+                    showNotification(`Ошибка загрузки способов оплаты: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error fetching payment methods:', error);
+                showNotification('Ошибка подключения к серверу', 'error');
+            }
+        }
+
+        // Function to render payment methods
+        function renderPaymentMethods(methods) {
+            const container = document.getElementById('payment-methods-list');
+            
+            if (methods.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-[#888]">
+                        Способы оплаты не найдены
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = methods.map(method => `
+                <div class="payment-method-item mb-6 pb-6 border-b border-[#222]" data-method-id="${method.id}">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h4 class="text-lg font-bold">${method.name}</h4>
+                            <div class="text-sm text-[#888]">ID: ${method.id}</div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" class="method-toggle" ${method.is_active ? 'checked' : ''} 
+                                   data-method-id="${method.id}">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-[#888] text-sm mb-2">Реквизиты/Инструкции</label>
+                        <textarea class="input-field method-details" rows="3">${method.details}</textarea>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="btn-primary save-method-btn" data-method-id="${method.id}">
+                            Сохранить
+                        </button>
+                        <button class="btn-danger delete-method-btn" data-method-id="${method.id}">
+                            Удалить
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add event listeners
+            document.querySelectorAll('.save-method-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const methodId = this.getAttribute('data-method-id');
+                    savePaymentMethod(methodId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-method-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const methodId = this.getAttribute('data-method-id');
+                    if (confirm('Вы уверены, что хотите удалить этот способ оплаты?')) {
+                        deletePaymentMethod(methodId);
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.method-toggle').forEach(toggle => {
+                toggle.addEventListener('change', function() {
+                    const methodId = this.getAttribute('data-method-id');
+                    const isActive = this.checked ? 1 : 0;
+                    updatePaymentMethodStatus(methodId, isActive);
+                });
+            });
+        }
+
+        // Save payment method
+        async function savePaymentMethod(methodId) {
+            const methodItem = document.querySelector(`.payment-method-item[data-method-id="${methodId}"]`);
+            const name = methodItem.querySelector('h4').textContent;
+            const details = methodItem.querySelector('.method-details').value;
+            const isActive = methodItem.querySelector('.method-toggle').checked ? 1 : 0;
+            
+            try {
+                const response = await fetch(`/api/admin/payment-methods/${methodId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        details: details,
+                        is_active: isActive
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Способ оплаты успешно сохранен', 'success');
+                } else {
+                    showNotification(`Ошибка сохранения: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error saving payment method:', error);
+                showNotification('Ошибка подключения к серверу', 'error');
+            }
+        }
+
+        // Update payment method status
+        async function updatePaymentMethodStatus(methodId, isActive) {
+            const methodItem = document.querySelector(`.payment-method-item[data-method-id="${methodId}"]`);
+            const name = methodItem.querySelector('h4').textContent;
+            const details = methodItem.querySelector('.method-details').value;
+            
+            try {
+                const response = await fetch(`/api/admin/payment-methods/${methodId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        details: details,
+                        is_active: isActive
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(`Способ оплаты ${isActive ? 'активирован' : 'деактивирован'}`, 'success');
+                } else {
+                    showNotification(`Ошибка обновления статуса: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error updating payment method status:', error);
+                showNotification('Ошибка подключения к серверу', 'error');
+            }
+        }
+
+        // Delete payment method
+        async function deletePaymentMethod(methodId) {
+            // In a real implementation, you would send a DELETE request
+            // For now, we'll just show a notification
+            showNotification('Удаление способов оплаты временно недоступно', 'error');
+        }
+
+        // Add new payment method
+        document.getElementById('add-method-btn').addEventListener('click', async function() {
+            const id = document.getElementById('new-method-id').value;
+            const name = document.getElementById('new-method-name').value;
+            const details = document.getElementById('new-method-details').value;
+            
+            if (!id || !name || !details) {
+                showNotification('Пожалуйста, заполните все поля', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/payment-methods/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        details: details,
+                        is_active: 1
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Новый способ оплаты добавлен', 'success');
+                    // Clear form
+                    document.getElementById('new-method-id').value = '';
+                    document.getElementById('new-method-name').value = '';
+                    document.getElementById('new-method-details').value = '';
+                    // Refresh list
+                    fetchPaymentMethods();
+                } else {
+                    showNotification(`Ошибка добавления: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error adding payment method:', error);
+                showNotification('Ошибка подключения к серверу', 'error');
+            }
+        });
+
+        // Initialize page
+        fetchPaymentMethods();
+    </script>
+</body>
+
+</html>
